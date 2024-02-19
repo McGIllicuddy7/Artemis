@@ -135,7 +135,7 @@ func main() {
 		for i := 0; i < num_vertices; i++ {
 			rl.DrawCircleV(vertices[i].location, 5, rl.Gray)
 			for j := 0; j < num_vertices; j++ {
-				if vertices[i].edges[j] > 0 {
+				if vertices[i].edges[j] > 0 && i != j {
 					tmp_buff := make([]byte, 0)
 					tmp_buff = append(tmp_buff, []byte(fmt.Sprintf("%d", vertices[i].edges[j]))...)
 					dv := rl.Vector2Subtract(vertices[j].location, vertices[i].location)
