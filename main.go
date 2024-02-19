@@ -80,7 +80,7 @@ func mutate(vertices []vertex_t, num_vertices int, a int) {
 			if vertices[i].edges[a] > 0 {
 				mutations[eventque_len] = new_mutation_event(i, j, edges[j]*vertices[i].edges[a])
 				eventque_len++
-			} else {
+			} else if vertices[a].edges[i] > 0 {
 				mutations[eventque_len] = new_mutation_event(j, i, edges[i]*vertices[j].edges[a])
 				eventque_len++
 			}
@@ -91,8 +91,10 @@ func mutate(vertices []vertex_t, num_vertices int, a int) {
 	}
 	//step 2
 	for i := 0; i < num_vertices; i++ {
-		edges[i] *= -1
-		vertices[i].edges[a] *= -1
+		tmp1 := vertices[i].edges[a]
+		tmp2 := vertices[a].edges[i]
+		vertices[a].edges[i] = tmp1
+		vertices[i].edges[a] = tmp2
 	}
 	//step 3
 	for i := 0; i < num_vertices-1; i++ {
