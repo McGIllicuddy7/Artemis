@@ -10,20 +10,23 @@ import (
 const SCREEN_HEIGHT = 900
 const SCREEN_WIDTH = 900
 const MAX_VERTICES = 64
-const MAX_EDGES = 128
-const CMD_LEN = 128
 
+// structure of a vertex. the edges are stored just as integers
 type vertex_t struct {
 	edges     [MAX_VERTICES]int
 	num_edges int
 	location  rl.Vector2
 }
+
+// stores a number to be added to a pair of edges in a mutation
+// so that mutations don't self interfere
 type mutation_event_t struct {
 	start int
 	end   int
 	value int
 }
 
+// to make the matrix graph
 func make_matrix_from_quiver(quiver []vertex_t, num int) matrix_t {
 	out := matrix_t{make([]int, num*num), num, num}
 	for i := 0; i < num; i++ {
@@ -33,6 +36,7 @@ func make_matrix_from_quiver(quiver []vertex_t, num int) matrix_t {
 	}
 	return out
 }
+
 func create_vertex(location rl.Vector2, vertices *[]vertex_t, num_vertices *int) {
 	if *num_vertices+1 > MAX_VERTICES {
 		return
@@ -45,6 +49,8 @@ func create_vertex(location rl.Vector2, vertices *[]vertex_t, num_vertices *int)
 	(*vertices)[*num_vertices] = v
 	(*num_vertices)++
 }
+
+// links a pair of vertices by incrementing the edges for a and decrementing them for b
 func vertex_link(vertices []vertex_t, a int, b int) {
 	vertices[a].edges[b]++
 	vertices[b].edges[a]--
@@ -67,7 +73,7 @@ func new_mutation_event(start int, end int, value int) mutation_event_t {
 func mutate(vertices []vertex_t, num_vertices int, a int) {
 	edges := vertices[a].edges
 	mutations := make([]mutation_event_t, 4096)
-	var eventque_len int
+	eventque_len := 0
 	// step one
 	for i := 0; i < num_vertices; i++ {
 		if i == a {
@@ -108,13 +114,17 @@ func mutate(vertices []vertex_t, num_vertices int, a int) {
 
 }
 func main() {
+	//initialization
 	cmd := ""
 	vertices := make([]vertex_t, MAX_VERTICES)
 	num_vertices := 0
+	//graphics initalization
 	rl.SetTraceLogLevel(rl.LogError)
 	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Artemis")
 	rl.SetTargetFPS(120)
+	//program loop
 	for !rl.WindowShouldClose() {
+		//input handling
 		if rl.IsMouseButtonPressed(rl.MouseLeftButton) && rl.GetMousePosition().Y < SCREEN_HEIGHT-20 {
 			create_vertex(rl.GetMousePosition(), &vertices, &num_vertices)
 		}
@@ -123,18 +133,23 @@ func main() {
 		} else {
 			cmd_parse(&cmd)
 		}
+		//rendering
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.Black)
+		//rendering the matrix
 		mat := make_matrix_from_quiver(vertices, num_vertices)
 		str := mat.to_string()
-		rl.DrawText(str, 100, 100, 12, rl.White)
+		rl.DrawText(str, 100, 800, 12, rl.White)
+		//rendering the terminal
 		textbox := rl.NewColor(60, 60, 60, 255)
 		rl.DrawRectangle(0, SCREEN_HEIGHT-20, SCREEN_WIDTH, 20, textbox)
 		rl.DrawText(string(cmd), 20, SCREEN_HEIGHT-20, 14, rl.Black)
+		//rendering the points
 		for i := 0; i < num_vertices; i++ {
 			rl.DrawCircleV(vertices[i].location, 5, rl.Gray)
 			for j := 0; j < num_vertices; j++ {
 				if vertices[i].edges[j] > 0 && i != j {
+					//this nightmare of trig renders arrows I don't understand it either
 					tmp_buff := make([]byte, 0)
 					tmp_buff = append(tmp_buff, []byte(fmt.Sprintf("%d", vertices[i].edges[j]))...)
 					dv := rl.Vector2Subtract(vertices[j].location, vertices[i].location)

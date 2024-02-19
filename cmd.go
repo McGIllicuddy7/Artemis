@@ -8,9 +8,12 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
+// appends a character to a string
 func cmd_append_character(cmd *string, c string) {
 	*cmd += c
 }
+
+// removes all whitespace characters to the left of the string and returns the trimmed strinf
 func strip_white_space_left(str string) string {
 	cmd_v := make([]byte, len(str))
 	for i := 0; i < len(str); i++ {
@@ -26,6 +29,9 @@ func strip_white_space_left(str string) string {
 	}
 	return string(cmd_v)
 }
+
+// probably a bad name, gets the next space seperated int from the string
+// makes the string start after that int and then returns that int
 func next_int(str *string) int {
 	*str = strip_white_space_left(*str)
 	buff := ""
@@ -41,9 +47,10 @@ func next_int(str *string) int {
 	v, _ := strconv.Atoi(string(buff))
 	return v
 }
+
+// executes a command passed in as a string, if it is a successful command
+// the string is then reset
 func cmd_execute(cmd *string, vertices *[]vertex_t, num_vertices *int) {
-	old_vertices := make([]vertex_t, MAX_VERTICES)
-	old_num_vertices := 0
 	if len(*cmd) < 3 {
 		return
 	}
@@ -55,10 +62,6 @@ func cmd_execute(cmd *string, vertices *[]vertex_t, num_vertices *int) {
 		os.Exit(0)
 	}
 	if cmd_v[0] == 'l' && cmd_v[1] == 'n' && cmd_v[2] != 'r' {
-		for i := 0; i < len(old_vertices); i++ {
-			old_vertices[i] = (*vertices)[i]
-		}
-		old_num_vertices = *num_vertices
 		cmd_v = cmd_v[2:]
 		cmd_v = strip_white_space_left(cmd_v)
 		a := next_int(&cmd_v)
@@ -69,10 +72,6 @@ func cmd_execute(cmd *string, vertices *[]vertex_t, num_vertices *int) {
 		goto done
 	}
 	if cmd_v[0] == 'l' && cmd_v[1] == 'n' && cmd_v[2] == 'r' {
-		for i := 0; i < len(old_vertices); i++ {
-			old_vertices[i] = (*vertices)[i]
-		}
-		old_num_vertices = *num_vertices
 		cmd_v = cmd_v[2:]
 		cmd_v = strip_white_space_left(cmd_v)
 		a := next_int(&cmd_v)
@@ -83,10 +82,6 @@ func cmd_execute(cmd *string, vertices *[]vertex_t, num_vertices *int) {
 		goto done
 	}
 	if cmd_v[0] == 'm' && cmd_v[1] == 'u' && cmd_v[2] == 't' {
-		for i := 0; i < len(old_vertices); i++ {
-			old_vertices[i] = (*vertices)[i]
-		}
-		old_num_vertices = *num_vertices
 		cmd_v = cmd_v[3:]
 		cmd_v = strip_white_space_left(cmd_v)
 		a := next_int(&cmd_v)
@@ -94,17 +89,16 @@ func cmd_execute(cmd *string, vertices *[]vertex_t, num_vertices *int) {
 		*cmd = ""
 		goto done
 	}
-	if cmd_v[0] == 'u' && cmd_v[1] == 'n' && cmd_v[2] == 'd' && cmd_v[3] == 'o' {
-		for i := 0; i < len(old_vertices); i++ {
-			old_vertices[i] = (*vertices)[i]
-		}
-		*num_vertices = old_num_vertices
-		*cmd = ""
+	if cmd_v[0] == 'p' && cmd_v[1] == 'o' && cmd_v[2] == 'p' {
+		*num_vertices--
 		goto done
 	}
 done:
 	return
 }
+
+// called every frame to update the command based on user input
+// also probably a bad name
 func cmd_parse(cmd *string) {
 	if (rl.IsKeyDown(rl.KeyDelete) || rl.IsKeyPressed(rl.KeyBackspace)) && rl.IsKeyDown(rl.KeyLeftShift) {
 		*cmd = ""
