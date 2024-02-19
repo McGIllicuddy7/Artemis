@@ -18,7 +18,7 @@ func (this *matrix_t) to_string() string {
 	out := ""
 	for j := 0; j < this.height; j++ {
 		for i := 0; i < this.width; i++ {
-			out += strconv.Itoa(i) + " "
+			out += strconv.Itoa(this.get(i, j)) + " "
 		}
 		out += "\n"
 	}

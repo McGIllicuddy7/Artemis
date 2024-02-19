@@ -91,14 +91,10 @@ func mutate(vertices []vertex_t, num_vertices int, a int) {
 	}
 	//step 2
 	for i := 0; i < num_vertices; i++ {
-		if edges[i] > 0 || vertices[i].edges[a] > 0 {
-			tmp := edges[i]
-			tmp2 := vertices[i].edges[a]
-			edges[i] = tmp2
-			vertices[i].edges[a] = tmp
-
-		}
+		edges[i] *= -1
+		vertices[i].edges[a] *= -1
 	}
+	//step 3
 	for i := 0; i < num_vertices-1; i++ {
 		for j := i + 1; j < num_vertices; j++ {
 			tmp_i := vertices[i].edges[j]
@@ -107,6 +103,7 @@ func mutate(vertices []vertex_t, num_vertices int, a int) {
 			vertices[j].edges[i] = tmp_j - tmp_i
 		}
 	}
+
 }
 func main() {
 	cmd := ""
