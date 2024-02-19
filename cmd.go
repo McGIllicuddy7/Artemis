@@ -93,6 +93,9 @@ func cmd_execute(cmd *string, vertices *[]vertex_t, num_vertices *int) {
 		*num_vertices--
 		goto done
 	}
+	if cmd_v == "reset" {
+		*num_vertices = 0
+	}
 done:
 	return
 }
