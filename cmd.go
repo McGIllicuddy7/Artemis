@@ -91,10 +91,13 @@ func cmd_execute(cmd *string, vertices *[]vertex_t, num_vertices *int) {
 	}
 	if cmd_v[0] == 'p' && cmd_v[1] == 'o' && cmd_v[2] == 'p' {
 		*num_vertices--
+		*cmd = ""
 		goto done
 	}
 	if cmd_v == "reset" {
 		*num_vertices = 0
+		*cmd = ""
+		goto done
 	}
 done:
 	return
