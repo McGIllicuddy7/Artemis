@@ -1,4 +1,4 @@
-#Quiver Manipulation Software
+# Quiver Manipulation Software
 https://go.dev/doc/install link to the go installation
 you need a go compiler to run this. To compile it run go build in the terminal while in the Artemis Directory. to run type ./artemis into the command line
 
