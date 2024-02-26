@@ -27,6 +27,10 @@ type mutation_event_t struct {
 }
 
 func returns_to_self(idx int, target_idx int, visited []bool, quiver []vertex_t) bool {
+	if visited[idx] {
+		return false
+	}
+	visited[idx] = true
 	if quiver[idx].edges[target_idx] > 0 {
 		return true
 	}
@@ -38,7 +42,6 @@ func returns_to_self(idx int, target_idx int, visited []bool, quiver []vertex_t)
 			}
 		}
 	}
-	visited[idx] = true
 	return false
 }
 func is_cyclic(quiver []vertex_t) bool {
@@ -257,7 +260,8 @@ func main() {
 		if is_cyclic(vertices) {
 			cyc_msg = "is cyclic"
 		}
-		rl.DrawText(cyc_msg, 800, 20, 16, rl.RayWhite)
+		rl.DrawText(cyc_msg, 20, 20, 16, rl.RayWhite)
+		rl.DrawText(fmt.Sprintf("determinant is %f", determinant(mat)), 20, 40, 16, rl.RayWhite)
 		rl.EndDrawing()
 	}
 }
