@@ -95,7 +95,7 @@ func new_mutation_event(start int, end int, value int) mutation_event_t {
 	out.value = value
 	return out
 }
-func mutate(vertices []vertex_t, num_vertices int, a int) {
+func mutate_inline(vertices []vertex_t, num_vertices int, a int) {
 	edges := vertices[a].edges
 	mutations := make([]mutation_event_t, 4096)
 	eventque_len := 0
@@ -137,6 +137,53 @@ func mutate(vertices []vertex_t, num_vertices int, a int) {
 		}
 	}
 
+}
+func mutate(in_vertices []vertex_t, num_vertices int, a int) []vertex_t {
+	vertices := make([]vertex_t, len(in_vertices))
+	for i := 0; i < len(in_vertices); i++ {
+		vertices[i] = in_vertices[i]
+	}
+	edges := vertices[a].edges
+	mutations := make([]mutation_event_t, 4096)
+	eventque_len := 0
+	// step one
+	for i := 0; i < num_vertices; i++ {
+		if i == a {
+			continue
+		}
+		for j := 0; j < num_vertices; j++ {
+			if j == a || j == i {
+				continue
+			}
+			if vertices[i].edges[a] > 0 {
+				mutations[eventque_len] = new_mutation_event(i, j, edges[j]*vertices[i].edges[a])
+				eventque_len++
+			} else if vertices[a].edges[i] > 0 {
+				mutations[eventque_len] = new_mutation_event(j, i, edges[i]*vertices[j].edges[a])
+				eventque_len++
+			}
+		}
+	}
+	for i := 0; i < eventque_len; i++ {
+		vertices[mutations[i].start].edges[mutations[i].end] += mutations[i].value
+	}
+	//step 2
+	for i := 0; i < num_vertices; i++ {
+		tmp1 := vertices[i].edges[a]
+		tmp2 := vertices[a].edges[i]
+		vertices[a].edges[i] = tmp1
+		vertices[i].edges[a] = tmp2
+	}
+	//step 3
+	for i := 0; i < num_vertices-1; i++ {
+		for j := i + 1; j < num_vertices; j++ {
+			tmp_i := vertices[i].edges[j]
+			tmp_j := vertices[j].edges[i]
+			vertices[i].edges[j] = tmp_i - tmp_j
+			vertices[j].edges[i] = tmp_j - tmp_i
+		}
+	}
+	return vertices
 }
 func main() {
 	//initialization

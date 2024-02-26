@@ -85,7 +85,7 @@ func cmd_execute(cmd *string, vertices *[]vertex_t, num_vertices *int) {
 		cmd_v = cmd_v[3:]
 		cmd_v = strip_white_space_left(cmd_v)
 		a := next_int(&cmd_v)
-		mutate(*vertices, *num_vertices, a)
+		mutate_inline(*vertices, *num_vertices, a)
 		*cmd = ""
 		goto done
 	}

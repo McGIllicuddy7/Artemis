@@ -24,3 +24,6 @@ func (this *matrix_t) to_string() string {
 	}
 	return out
 }
+func determinant(matrix matrix_t) {
+
+}
