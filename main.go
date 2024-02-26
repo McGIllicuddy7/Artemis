@@ -26,6 +26,31 @@ type mutation_event_t struct {
 	value int
 }
 
+func returns_to_self(idx int, target_idx int, visited []bool, quiver []vertex_t) bool {
+	if quiver[idx].edges[target_idx] > 0 {
+		return true
+	}
+	for i := 0; i < len(quiver[idx].edges); i++ {
+		if !visited[i] && quiver[idx].edges[i] > 0 {
+			tmp := returns_to_self(i, target_idx, visited, quiver)
+			if tmp {
+				return true
+			}
+		}
+	}
+	visited[idx] = true
+	return false
+}
+func is_cyclic(quiver []vertex_t) bool {
+	for i := 0; i < len(quiver); i++ {
+		visited := make([]bool, len(quiver))
+		if returns_to_self(i, i, visited, quiver) {
+			return true
+		}
+	}
+	return false
+}
+
 // to make the matrix graph
 func make_matrix_from_quiver(quiver []vertex_t, num int) matrix_t {
 	out := matrix_t{make([]int, num*num), num, num}
@@ -181,6 +206,11 @@ func main() {
 			l := fmt.Sprintf("%d", i)
 			rl.DrawText(l, int32(vertices[i].location.X+SCREEN_WIDTH/100.0), int32(vertices[i].location.Y-SCREEN_HEIGHT/100.0), 14, rl.White)
 		}
+		cyc_msg := "is not cyclic"
+		if is_cyclic(vertices) {
+			cyc_msg = "is cyclic"
+		}
+		rl.DrawText(cyc_msg, 800, 20, 16, rl.RayWhite)
 		rl.EndDrawing()
 	}
 }
