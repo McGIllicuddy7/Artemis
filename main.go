@@ -56,10 +56,10 @@ func is_cyclic(quiver []vertex_t) bool {
 
 // to make the matrix graph
 func make_matrix_from_quiver(quiver []vertex_t, num int) matrix_t {
-	out := matrix_t{make([]int, num*num), num, num}
+	out := matrix_t{make([]complex128, num*num), num, num}
 	for i := 0; i < num; i++ {
 		for j := 0; j < num; j++ {
-			out.set(i, j, quiver[i].edges[j])
+			out.set(i, j, complex(float64(quiver[i].edges[j]), 0))
 		}
 	}
 	return out
@@ -189,7 +189,14 @@ func mutate(in_vertices []vertex_t, num_vertices int, a int) []vertex_t {
 	return vertices
 }
 func main() {
-	//initialization
+	/*
+		mat := matrix_t{make([]int, 3, 3), 3, 3}
+		mat.data = []int{0, -1, 1, 1, 0, -1, -1, 1, 0}
+		println(mat.to_string())
+		det := determinant(mat)
+		println()
+		println(det)
+	*/
 	cmd := ""
 	vertices := make([]vertex_t, MAX_VERTICES)
 	num_vertices := 0
@@ -214,7 +221,7 @@ func main() {
 		//rendering the matrix
 		mat := make_matrix_from_quiver(vertices, num_vertices)
 		str := mat.to_string()
-		rl.DrawText(str, 100, 800, 12, rl.White)
+		rl.DrawText(str, 20, 800, 16, rl.White)
 		//rendering the terminal
 		textbox := rl.NewColor(60, 60, 60, 255)
 		rl.DrawRectangle(0, SCREEN_HEIGHT-20, SCREEN_WIDTH, 20, textbox)
@@ -261,7 +268,7 @@ func main() {
 			cyc_msg = "is cyclic"
 		}
 		rl.DrawText(cyc_msg, 20, 20, 16, rl.RayWhite)
-		rl.DrawText(fmt.Sprintf("determinant is %f", determinant(mat)), 20, 40, 16, rl.RayWhite)
+		rl.DrawText(fmt.Sprintf("determinant is %f", real(mat.determinant())), 20, 40, 16, rl.RayWhite)
 		rl.EndDrawing()
 	}
 }
