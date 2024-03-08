@@ -107,14 +107,14 @@ func mutate_inline(vertices []vertex_t, num_vertices int, a int) {
 		if i == a {
 			continue
 		}
-		for j := 0; j < num_vertices; j++ {
+		for j := i; j < num_vertices; j++ {
 			if j == a || j == i {
 				continue
 			}
-			if vertices[i].edges[a] > 0 {
+			if vertices[i].edges[a] > 0 && vertices[a].edges[j]{
 				mutations[eventque_len] = new_mutation_event(i, j, edges[j]*vertices[i].edges[a])
 				eventque_len++
-			} else if vertices[a].edges[i] > 0 {
+			} else if  > 0 {
 				mutations[eventque_len] = new_mutation_event(j, i, edges[i]*vertices[j].edges[a])
 				eventque_len++
 			}
@@ -226,6 +226,7 @@ func main() {
 		textbox := rl.NewColor(60, 60, 60, 255)
 		rl.DrawRectangle(0, SCREEN_HEIGHT-20, SCREEN_WIDTH, 20, textbox)
 		rl.DrawText(string(cmd), 20, SCREEN_HEIGHT-20, 14, rl.Black)
+		arrow_color := rl.Red
 		//rendering the points
 		for i := 0; i < num_vertices; i++ {
 			rl.DrawCircleV(vertices[i].location, 5, rl.Gray)
@@ -250,9 +251,9 @@ func main() {
 					}
 					l0 := rl.Vector2Subtract(vertices[j].location, rl.NewVector2(dx0, dy0))
 					l1 := rl.Vector2Subtract(vertices[j].location, rl.NewVector2(dx1, dy1))
-					rl.DrawLineEx(vertices[i].location, vertices[j].location, 2, rl.Red)
-					rl.DrawLineEx(vertices[j].location, l0, 2, rl.Red)
-					rl.DrawLineEx(vertices[j].location, l1, 2, rl.Red)
+					rl.DrawLineEx(vertices[i].location, vertices[j].location, 2, arrow_color)
+					rl.DrawLineEx(vertices[j].location, l0, 2, arrow_color)
+					rl.DrawLineEx(vertices[j].location, l1, 2, arrow_color)
 					theta2 := theta - math.Pi/2
 					v := rl.NewVector2(float32(math.Cos(theta2)*15), float32(math.Cos(theta2)*15))
 					avg := rl.Vector2Scale(rl.Vector2Add(vertices[j].location, vertices[i].location), 0.5)

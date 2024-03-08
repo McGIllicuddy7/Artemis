@@ -1,8 +1,8 @@
 package main
 
 import (
+	"fmt"
 	"math/cmplx"
-	"strconv"
 )
 
 type matrix_t struct {
@@ -53,7 +53,7 @@ func (this *matrix_t) to_string() string {
 	out := ""
 	for j := 0; j < this.height; j++ {
 		for i := 0; i < this.width; i++ {
-			out += strconv.FormatComplex(this.get(i, j), 'G', 4, 128) + " "
+			out += fmt.Sprintf("%d", int(real(this.get(i, j))))
 		}
 		out += "\n"
 	}
