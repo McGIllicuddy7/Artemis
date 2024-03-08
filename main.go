@@ -111,17 +111,15 @@ func mutate_inline(vertices []vertex_t, num_vertices int, a int) {
 			if j == a || j == i {
 				continue
 			}
-			if vertices[i].edges[a] > 0 && vertices[a].edges[j]{
+			if vertices[i].edges[a] > 0 && edges[j] > 0 {
 				mutations[eventque_len] = new_mutation_event(i, j, edges[j]*vertices[i].edges[a])
-				eventque_len++
-			} else if  > 0 {
-				mutations[eventque_len] = new_mutation_event(j, i, edges[i]*vertices[j].edges[a])
 				eventque_len++
 			}
 		}
 	}
 	for i := 0; i < eventque_len; i++ {
 		vertices[mutations[i].start].edges[mutations[i].end] += mutations[i].value
+		vertices[mutations[i].end].edges[mutations[i].start] -= mutations[i].value
 	}
 	//step 2
 	for i := 0; i < num_vertices; i++ {
@@ -135,11 +133,10 @@ func mutate_inline(vertices []vertex_t, num_vertices int, a int) {
 		for j := i + 1; j < num_vertices; j++ {
 			tmp_i := vertices[i].edges[j]
 			tmp_j := vertices[j].edges[i]
-			vertices[i].edges[j] = tmp_i - tmp_j
-			vertices[j].edges[i] = tmp_j - tmp_i
+			vertices[i].edges[j] -= tmp_i - tmp_j
+			vertices[j].edges[i] -= tmp_j - tmp_i
 		}
 	}
-
 }
 func mutate(in_vertices []vertex_t, num_vertices int, a int) []vertex_t {
 	vertices := make([]vertex_t, len(in_vertices))
@@ -149,26 +146,24 @@ func mutate(in_vertices []vertex_t, num_vertices int, a int) []vertex_t {
 	edges := vertices[a].edges
 	mutations := make([]mutation_event_t, 4096)
 	eventque_len := 0
-	// step one
+	//set one
 	for i := 0; i < num_vertices; i++ {
 		if i == a {
 			continue
 		}
-		for j := 0; j < num_vertices; j++ {
+		for j := i; j < num_vertices; j++ {
 			if j == a || j == i {
 				continue
 			}
-			if vertices[i].edges[a] > 0 {
+			if vertices[i].edges[a] > 0 && edges[j] > 0 {
 				mutations[eventque_len] = new_mutation_event(i, j, edges[j]*vertices[i].edges[a])
-				eventque_len++
-			} else if vertices[a].edges[i] > 0 {
-				mutations[eventque_len] = new_mutation_event(j, i, edges[i]*vertices[j].edges[a])
 				eventque_len++
 			}
 		}
 	}
 	for i := 0; i < eventque_len; i++ {
 		vertices[mutations[i].start].edges[mutations[i].end] += mutations[i].value
+		vertices[mutations[i].end].edges[mutations[i].start] -= mutations[i].value
 	}
 	//step 2
 	for i := 0; i < num_vertices; i++ {
@@ -182,8 +177,8 @@ func mutate(in_vertices []vertex_t, num_vertices int, a int) []vertex_t {
 		for j := i + 1; j < num_vertices; j++ {
 			tmp_i := vertices[i].edges[j]
 			tmp_j := vertices[j].edges[i]
-			vertices[i].edges[j] = tmp_i - tmp_j
-			vertices[j].edges[i] = tmp_j - tmp_i
+			vertices[i].edges[j] -= tmp_i - tmp_j
+			vertices[j].edges[i] -= tmp_j - tmp_i
 		}
 	}
 	return vertices
