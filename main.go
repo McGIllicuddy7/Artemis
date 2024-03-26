@@ -1,6 +1,9 @@
 package main
 
 import (
+	La "artemis/LA"
+	fr "artemis/fractions"
+	"artemis/utils"
 	"fmt"
 	"math"
 
@@ -13,9 +16,8 @@ const MAX_VERTICES = 64
 
 // structure of a vertex. the edges are stored just as integers
 type vertex_t struct {
-	edges     [MAX_VERTICES]int
-	num_edges int
-	location  rl.Vector2
+	edges    [MAX_VERTICES]int
+	location rl.Vector2
 }
 
 // stores a number to be added to a pair of edges in a mutation
@@ -55,11 +57,11 @@ func is_cyclic(quiver []vertex_t) bool {
 }
 
 // to make the matrix graph
-func make_matrix_from_quiver(quiver []vertex_t, num int) matrix_t {
-	out := matrix_t{make([]complex128, num*num), num, num}
+func make_matrix_from_quiver(quiver []vertex_t, num int) La.Matrix {
+	out := La.ZeroMatrix(num, num)
 	for i := 0; i < num; i++ {
 		for j := 0; j < num; j++ {
-			out.set(i, j, complex(float64(quiver[i].edges[j]), 0))
+			out.Set(i, j, fr.FromInt(quiver[i].edges[j]))
 		}
 	}
 	return out
@@ -140,9 +142,7 @@ func mutate_inline(vertices []vertex_t, num_vertices int, a int) {
 }
 func mutate(in_vertices []vertex_t, num_vertices int, a int) []vertex_t {
 	vertices := make([]vertex_t, len(in_vertices))
-	for i := 0; i < len(in_vertices); i++ {
-		vertices[i] = in_vertices[i]
-	}
+	copy(vertices, in_vertices)
 	edges := vertices[a].edges
 	mutations := make([]mutation_event_t, 4096)
 	eventque_len := 0
@@ -199,14 +199,23 @@ func main() {
 	rl.SetTraceLogLevel(rl.LogError)
 	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Artemis")
 	rl.SetTargetFPS(120)
+	mat := make_matrix_from_quiver(vertices, num_vertices)
+	eigens := mat.EigenValues()
+	_ = mat.EigenVectors()
 	//program loop
 	for !rl.WindowShouldClose() {
 		//input handling
 		if rl.IsMouseButtonPressed(rl.MouseLeftButton) && rl.GetMousePosition().Y < SCREEN_HEIGHT-20 {
 			create_vertex(rl.GetMousePosition(), &vertices, &num_vertices)
+			mat = make_matrix_from_quiver(vertices, num_vertices)
+			eigens = mat.EigenValues()
+			_ = mat.EigenVectors()
 		}
 		if rl.IsKeyPressed(rl.KeyEnter) {
 			cmd_execute(&cmd, &vertices, &num_vertices)
+			mat = make_matrix_from_quiver(vertices, num_vertices)
+			eigens = mat.EigenValues()
+			_ = mat.EigenVectors()
 		} else {
 			cmd_parse(&cmd)
 		}
@@ -214,8 +223,7 @@ func main() {
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.Black)
 		//rendering the matrix
-		mat := make_matrix_from_quiver(vertices, num_vertices)
-		str := mat.to_string()
+		str := mat.ToString()
 		rl.DrawText(str, 20, 800, 16, rl.White)
 		//rendering the terminal
 		textbox := rl.NewColor(60, 60, 60, 255)
@@ -264,7 +272,22 @@ func main() {
 			cyc_msg = "is cyclic"
 		}
 		rl.DrawText(cyc_msg, 20, 20, 16, rl.RayWhite)
-		rl.DrawText(fmt.Sprintf("determinant is %f", real(mat.determinant())), 20, 40, 16, rl.RayWhite)
+		rl.DrawText(fmt.Sprintf("determinant is %s", mat.Determinant().ToString()), 20, 40, 16, rl.RayWhite)
+		rl.DrawText("eigen values: ", 600, 80, 16, rl.RayWhite)
+		for i := 0; i < len(eigens); i++ {
+			msg := utils.FormatComplex(eigens[i])
+			if i != len(eigens)-1 {
+				msg += ", "
+			}
+			rl.DrawText(msg, int32(600), int32(32+80+i*32), 16, rl.RayWhite)
+		}
+		/*
+			for i := 0; i < len(vecs); i++ {
+				for j := 0; j < len(vecs[i]); j++ {
+					rl.DrawText(fmt.Sprintf("%s ", utils.FormatComplex(eigens[i])), int32(300+80*i), int32(630+30*j), 20, rl.RayWhite)
+				}
+			}
+		*/
 		rl.EndDrawing()
 	}
 }
