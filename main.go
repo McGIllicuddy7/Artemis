@@ -1,8 +1,8 @@
 package main
 
 import (
+	fr "artemis/Fractions"
 	La "artemis/LA"
-	fr "artemis/fractions"
 	"artemis/utils"
 	"fmt"
 	"math"
@@ -109,11 +109,8 @@ func mutate_inline(vertices []vertex_t, num_vertices int, a int) {
 		if i == a {
 			continue
 		}
-		for j := i; j < num_vertices; j++ {
-			if j == a || j == i {
-				continue
-			}
-			if vertices[i].edges[a] > 0 && edges[j] > 0 {
+		for j := 0; j < num_vertices; j++ {
+			if vertices[i].edges[a] > 0 {
 				mutations[eventque_len] = new_mutation_event(i, j, edges[j]*vertices[i].edges[a])
 				eventque_len++
 			}
@@ -123,21 +120,11 @@ func mutate_inline(vertices []vertex_t, num_vertices int, a int) {
 		vertices[mutations[i].start].edges[mutations[i].end] += mutations[i].value
 		vertices[mutations[i].end].edges[mutations[i].start] -= mutations[i].value
 	}
-	//step 2
 	for i := 0; i < num_vertices; i++ {
 		tmp1 := vertices[i].edges[a]
 		tmp2 := vertices[a].edges[i]
 		vertices[a].edges[i] = tmp1
 		vertices[i].edges[a] = tmp2
-	}
-	//step 3
-	for i := 0; i < num_vertices-1; i++ {
-		for j := i + 1; j < num_vertices; j++ {
-			tmp_i := vertices[i].edges[j]
-			tmp_j := vertices[j].edges[i]
-			vertices[i].edges[j] -= tmp_i - tmp_j
-			vertices[j].edges[i] -= tmp_j - tmp_i
-		}
 	}
 }
 func mutate(in_vertices []vertex_t, num_vertices int, a int) []vertex_t {
@@ -146,16 +133,13 @@ func mutate(in_vertices []vertex_t, num_vertices int, a int) []vertex_t {
 	edges := vertices[a].edges
 	mutations := make([]mutation_event_t, 4096)
 	eventque_len := 0
-	//set one
+	// step one
 	for i := 0; i < num_vertices; i++ {
 		if i == a {
 			continue
 		}
-		for j := i; j < num_vertices; j++ {
-			if j == a || j == i {
-				continue
-			}
-			if vertices[i].edges[a] > 0 && edges[j] > 0 {
+		for j := 0; j < num_vertices; j++ {
+			if vertices[i].edges[a] > 0 {
 				mutations[eventque_len] = new_mutation_event(i, j, edges[j]*vertices[i].edges[a])
 				eventque_len++
 			}
@@ -165,21 +149,11 @@ func mutate(in_vertices []vertex_t, num_vertices int, a int) []vertex_t {
 		vertices[mutations[i].start].edges[mutations[i].end] += mutations[i].value
 		vertices[mutations[i].end].edges[mutations[i].start] -= mutations[i].value
 	}
-	//step 2
 	for i := 0; i < num_vertices; i++ {
 		tmp1 := vertices[i].edges[a]
 		tmp2 := vertices[a].edges[i]
 		vertices[a].edges[i] = tmp1
 		vertices[i].edges[a] = tmp2
-	}
-	//step 3
-	for i := 0; i < num_vertices-1; i++ {
-		for j := i + 1; j < num_vertices; j++ {
-			tmp_i := vertices[i].edges[j]
-			tmp_j := vertices[j].edges[i]
-			vertices[i].edges[j] -= tmp_i - tmp_j
-			vertices[j].edges[i] -= tmp_j - tmp_i
-		}
 	}
 	return vertices
 }

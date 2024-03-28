@@ -1,7 +1,7 @@
-package algebra
+package Algebra
 
 import (
-	fr "artemis/fractions"
+	fr "artemis/Fractions"
 	"fmt"
 	"strconv"
 )

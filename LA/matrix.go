@@ -1,7 +1,7 @@
 package La
 
 import (
-	fr "artemis/fractions"
+	fr "artemis/Fractions"
 	"math/rand"
 )
 

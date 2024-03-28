@@ -1,9 +1,11 @@
 package La
 
 import (
-	al "artemis/algebra"
-	fr "artemis/fractions"
+	al "artemis/Algebra"
+	autopsy "artemis/Autopsy"
+	fr "artemis/Fractions"
 	"artemis/utils"
+	"os"
 )
 
 type PolyMatrix struct {
@@ -90,6 +92,8 @@ func (tmat *PolyMatrix) elimRowCollumn(idx int) PolyMatrix {
 }
 
 func (tmat PolyMatrix) CharacteristicPolynomial() al.Polynomial {
+	utils.TimeoutPush("CharacteristicPolynomial")
+	defer utils.TimeoutPop()
 	if tmat.width == 2 && tmat.height == 2 {
 		a := tmat.Get(0, 0)
 		b := tmat.Get(0, 1)
@@ -116,20 +120,38 @@ func (tmat PolyMatrix) CharacteristicPolynomial() al.Polynomial {
 	return out
 }
 func (tmat *Matrix) EigenValues() []complex128 {
+	if tmat.height < 2 || tmat.width < 2 {
+		return make([]complex128, 0)
+	}
+	utils.TimeoutPush("EigenValues")
+	defer utils.TimeoutPop()
 	eigen := tmat.ToEigenMatrix()
 	poly := eigen.CharacteristicPolynomial()
 	return poly.FindZeros()
 }
 func (tmat *Matrix) EigenVectors() []Vector {
+	if tmat.height < 2 || tmat.width < 2 {
+		return make([]Vector, 0)
+	}
+	utils.TimeoutPush("EigenVectors")
+	defer utils.TimeoutPop()
 	eigens := tmat.EigenValues()
 	out := make([]Vector, 0)
 	for i := 0; i < len(eigens); i++ {
 		mat := ComplexMatrixSub(tmat.ToComplex(), ComplexMatrixScale(ComplexIdentity(tmat.height), eigens[i]))
 		tmp := mat.Solve(ZeroVector(tmat.height))
-		if !VectorEqual(tmat.MultByVector(tmp), ZeroVector(tmat.height)) {
+		autopsy.Store(mat.ToString())
+		tri := mat.ToUpperTriangular()
+		autopsy.Store(tri.ToString())
+		autopsy.Store(tmp.ToString())
+		autopsy.Store(tmat.MultByVector(tmp).ToString())
+		if !VectorEqual(mat.MultByVector(tmp), ZeroVector(tmat.height)) {
 			println("failed")
+			autopsy.Dump()
+			os.Exit(1)
 		}
 		out = append(out, tmp)
+		autopsy.Reset()
 	}
 	return out
 }

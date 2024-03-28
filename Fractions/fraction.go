@@ -1,4 +1,4 @@
-package fractions
+package Fractions
 
 import (
 	"fmt"

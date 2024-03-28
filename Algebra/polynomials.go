@@ -1,9 +1,10 @@
-package algebra
+package Algebra
 
 import (
-	fr "artemis/fractions"
+	fr "artemis/Fractions"
 	"artemis/utils"
 	"errors"
+	"fmt"
 	"math/cmplx"
 )
 
@@ -126,10 +127,19 @@ func (poly Polynomial) Evaluate(x fr.Fraction) fr.Fraction {
 	}
 	return out
 }
+func cmplxpow(value complex128, power int) complex128 {
+	out := value
+	for i := 0; i < power; i++ {
+		out *= value
+	}
+	return out
+}
+
 func (poly *polycule) evaluateComplex(x complex128) complex128 {
 	v := poly.coef.ToComplex()
-	p := complex(float64(poly.pow), 0)
-	y := cmplx.Pow(x, p)
+	p := poly.pow
+	//y := cmplx.Pow(x, p)
+	y := cmplxpow(x, p)
 	return v * y
 }
 func (poly Polynomial) EvaluateComplex(x complex128) complex128 {
@@ -179,9 +189,6 @@ func (poly Polynomial) Integral() (Polynomial, error) {
 	return out, error(nil)
 }
 func (poly Polynomial) MinMaxPowers() (int, int) {
-	if (len(poly.data)) < 1 {
-		return 0, 0
-	}
 	lowest := poly.data[0].pow
 	highest := poly.data[0].pow
 	for i := 0; i < len(poly.data); i++ {
@@ -203,12 +210,17 @@ func (poly Polynomial) GetPowerCoefficient(power int) fr.Fraction {
 	return fr.FromInt(0)
 }
 func (poly Polynomial) FindZero(seed complex128) complex128 {
+	utils.TimeoutPush("FindZero")
+	defer utils.TimeoutPop()
 	der := poly.Derivitive()
 	value := seed
 	failsafe := 0
 restart:
 	for i := 0; i < 1000; i++ {
 		current := poly.EvaluateComplex(value)
+		if cmplx.Abs(current) <= 0.00001 {
+			return value
+		}
 		delta := der.EvaluateComplex(value)
 		value -= current / delta
 	}
@@ -216,6 +228,8 @@ restart:
 		failsafe++
 		value = utils.RandomComplex()
 		goto restart
+	} else {
+		fmt.Printf("failed\n")
 	}
 	return value
 }
@@ -228,6 +242,8 @@ func cmplxContains(slice []complex128, v complex128) bool {
 	return false
 }
 func (poly Polynomial) FindZeros() []complex128 {
+	utils.TimeoutPush("FindZeros")
+	defer utils.TimeoutPop()
 	minp, maxp := poly.MinMaxPowers()
 	utils.SortInplace[polycule](poly.data, polycule_cmp)
 	if minp >= 0 && maxp == 2 {
