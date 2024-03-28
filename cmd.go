@@ -50,16 +50,18 @@ func next_int(str *string) int {
 
 // executes a command passed in as a string, if it is a successful command
 // the string is then reset
-func cmd_execute(cmd *string, vertices *[]vertex_t, num_vertices *int) {
+func cmd_execute(cmd *string, vertices *[]vertex_t, num_vertices *int) bool {
 	if len(*cmd) < 3 {
-		return
+		return false
 	}
 	cmd_v := strip_white_space_left(*cmd)
 	if cmd_v[0] == 'h' {
 		cmd_v = (fmt.Sprintf(string(cmd_v), "h for help, ln a b to create an edge from a to b, lnr a b to remove an edge from a to b, mut a to morph a,shift+delete to clear terminal exit to exit, "))
+		return true
 	}
 	if cmd_v[0] == 'e' && cmd_v[1] == 'x' && cmd_v[2] == 'i' && cmd_v[3] == 't' {
 		os.Exit(0)
+		return true
 	}
 	if cmd_v[0] == 'l' && cmd_v[1] == 'n' && cmd_v[2] != 'r' {
 		cmd_v = cmd_v[2:]
@@ -99,8 +101,9 @@ func cmd_execute(cmd *string, vertices *[]vertex_t, num_vertices *int) {
 		*cmd = ""
 		goto done
 	}
+	return false
 done:
-	return
+	return true
 }
 
 // called every frame to update the command based on user input
