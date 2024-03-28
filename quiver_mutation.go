@@ -93,6 +93,7 @@ func new_mutation_event(start int, end int, value int) mutation_event_t {
 	out.value = value
 	return out
 }
+
 func mutate_inline(vertices []vertex_t, num_vertices int, a int) {
 	edges := vertices[a].edges
 	mutations := make([]mutation_event_t, 4096)
@@ -120,36 +121,39 @@ func mutate_inline(vertices []vertex_t, num_vertices int, a int) {
 		vertices[i].edges[a] = tmp2
 	}
 }
-func mutate(in_vertices []vertex_t, num_vertices int, a int) []vertex_t {
-	vertices := make([]vertex_t, len(in_vertices))
-	copy(vertices, in_vertices)
-	edges := vertices[a].edges
-	mutations := make([]mutation_event_t, 4096)
-	eventque_len := 0
-	// step one
-	for i := 0; i < num_vertices; i++ {
-		if i == a {
-			continue
-		}
-		for j := 0; j < num_vertices; j++ {
-			if vertices[i].edges[a] > 0 {
-				mutations[eventque_len] = new_mutation_event(i, j, edges[j]*vertices[i].edges[a])
-				eventque_len++
+
+/*
+	func mutate(in_vertices []vertex_t, num_vertices int, a int) []vertex_t {
+		vertices := make([]vertex_t, len(in_vertices))
+		copy(vertices, in_vertices)
+		edges := vertices[a].edges
+		mutations := make([]mutation_event_t, 4096)
+		eventque_len := 0
+		// step one
+		for i := 0; i < num_vertices; i++ {
+			if i == a {
+				continue
+			}
+			for j := 0; j < num_vertices; j++ {
+				if vertices[i].edges[a] > 0 {
+					mutations[eventque_len] = new_mutation_event(i, j, edges[j]*vertices[i].edges[a])
+					eventque_len++
+				}
 			}
 		}
+		for i := 0; i < eventque_len; i++ {
+			vertices[mutations[i].start].edges[mutations[i].end] += mutations[i].value
+			vertices[mutations[i].end].edges[mutations[i].start] -= mutations[i].value
+		}
+		for i := 0; i < num_vertices; i++ {
+			tmp1 := vertices[i].edges[a]
+			tmp2 := vertices[a].edges[i]
+			vertices[a].edges[i] = tmp1
+			vertices[i].edges[a] = tmp2
+		}
+		return vertices
 	}
-	for i := 0; i < eventque_len; i++ {
-		vertices[mutations[i].start].edges[mutations[i].end] += mutations[i].value
-		vertices[mutations[i].end].edges[mutations[i].start] -= mutations[i].value
-	}
-	for i := 0; i < num_vertices; i++ {
-		tmp1 := vertices[i].edges[a]
-		tmp2 := vertices[a].edges[i]
-		vertices[a].edges[i] = tmp1
-		vertices[i].edges[a] = tmp2
-	}
-	return vertices
-}
+*/
 func Sanitize(in_vertices []vertex_t, num_vertices int) {
 	for i := 0; i < len(in_vertices); i++ {
 		for j := 0; j < len(in_vertices); j++ {
