@@ -5,6 +5,7 @@ import (
 	"artemis/utils"
 	"errors"
 	"fmt"
+	"math"
 	"math/cmplx"
 )
 
@@ -257,10 +258,20 @@ func (poly Polynomial) FindZeros() []complex128 {
 	}
 	zeros := make([]complex128, 0)
 	num_zeros := maxp - minp
+	if poly.EvaluateComplex(0) == 0 {
+		zeros = append(zeros, 0)
+	}
 	for len(zeros) < num_zeros {
 		tmp := poly.FindZero(utils.RandomComplex())
 		if !cmplxContains(zeros, tmp) {
 			zeros = append(zeros, tmp)
+		}
+		if math.Abs(imag(tmp)) > 0.01 {
+			tmp2 := cmplx.Conj(tmp)
+			if !cmplxContains(zeros, tmp2) {
+				zeros = append(zeros, tmp2)
+			}
+
 		}
 	}
 	return zeros
