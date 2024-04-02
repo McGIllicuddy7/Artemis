@@ -1,6 +1,7 @@
 package main
 
 import (
+	La "artemis/LA"
 	"artemis/utils"
 	"fmt"
 	"math"
@@ -11,6 +12,7 @@ import (
 const SCREEN_HEIGHT = 900
 const SCREEN_WIDTH = 900
 const MAX_VERTICES = 64
+const OFFSET = 1
 
 func main() {
 	cmd := ""
@@ -24,6 +26,8 @@ func main() {
 	eigens := mat.EigenValues()
 	_ = mat.EigenVectors()
 	t_error := 0.0
+	poly_str := ""
+	mlt_str := ""
 	//program loop
 	for !rl.WindowShouldClose() {
 		//input handling
@@ -32,8 +36,12 @@ func main() {
 			mat = make_matrix_from_quiver(vertices, num_vertices)
 			eigens = mat.EigenValues()
 			_ = mat.EigenVectors()
+			poly := mat.ToEigenMatrix().CharacteristicPolynomial()
+			poly_str = poly.ToString()
+			mlt_str = ""
 		}
 		if rl.IsKeyPressed(rl.KeyEnter) {
+			old := make_matrix_from_quiver(vertices, num_vertices)
 			err := cmd_execute(&cmd, &vertices, &num_vertices)
 			Sanitize(vertices, num_vertices)
 			mat = make_matrix_from_quiver(vertices, num_vertices)
@@ -43,6 +51,10 @@ func main() {
 				t_error = 1.0
 				cmd = ""
 			}
+			poly := mat.ToEigenMatrix().CharacteristicPolynomial()
+			poly_str = poly.ToString()
+			_, tmp := La.MatrixPairRowReduce(old, mat)
+			mlt_str = tmp.ToString()
 		} else {
 			cmd_parse(&cmd)
 		}
@@ -52,6 +64,7 @@ func main() {
 		//rendering the matrix
 		str := mat.ToString()
 		rl.DrawText(str, 20, 800, 16, rl.White)
+		rl.DrawText(mlt_str, 200, 800, 16, rl.White)
 		//rendering the terminal
 		textbox := rl.NewColor(60, 60, 60, 255)
 		rl.DrawRectangle(0, SCREEN_HEIGHT-20, SCREEN_WIDTH, 20, textbox)
@@ -91,7 +104,7 @@ func main() {
 					rl.DrawText(string(tmp_buff), int32(v.X), int32(v.Y), 12, rl.White)
 				}
 			}
-			l := fmt.Sprintf("%d", i)
+			l := fmt.Sprintf("%d", i+OFFSET)
 			rl.DrawText(l, int32(vertices[i].location.X+SCREEN_WIDTH/100.0), int32(vertices[i].location.Y-SCREEN_HEIGHT/100.0), 14, rl.White)
 		}
 		cyc_msg := "is not cyclic"
@@ -112,6 +125,7 @@ func main() {
 			t_error -= float64(rl.GetFrameTime())
 			rl.DrawText("error: improper input", 600, 40, 16, rl.Red)
 		}
+		rl.DrawText("char poly: "+poly_str, 400, 800, 16, rl.White)
 		rl.EndDrawing()
 	}
 }

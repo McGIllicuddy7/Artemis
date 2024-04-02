@@ -45,7 +45,7 @@ func next_int(str *string) int {
 	}
 	(*str) = (*str)[counter:]
 	v, _ := strconv.Atoi(string(buff))
-	return v
+	return v - OFFSET
 }
 
 // executes a command passed in as a string, if it is a successful command
@@ -56,12 +56,25 @@ func cmd_execute(cmd *string, vertices *[]vertex_t, num_vertices *int) bool {
 	}
 	cmd_v := strip_white_space_left(*cmd)
 	if cmd_v[0] == 'h' {
-		cmd_v = (fmt.Sprintf(string(cmd_v), "h for help, ln a b to create an edge from a to b, lnr a b to remove an edge from a to b, mut a to morph a,shift+delete to clear terminal exit to exit, "))
+		cmd_v = (fmt.Sprintf(string(cmd_v), "h for help, ln a b to create an edge from a to b, lnr a b to remove an edge from a to b, mut a to m a,shift+delete to clear terminal exit to exit, "))
 		return true
 	}
 	if cmd_v[0] == 'e' && cmd_v[1] == 'x' && cmd_v[2] == 'i' && cmd_v[3] == 't' {
 		os.Exit(0)
 		return true
+	}
+	if cmd_v[0] == 'l' && cmd_v[1] == 'n' && cmd_v[2] == 'm' {
+		cmd_v = cmd_v[3:]
+		cmd_v = strip_white_space_left(cmd_v)
+		a := next_int(&cmd_v)
+		cmd_v = strip_white_space_left(cmd_v)
+		b := next_int(&cmd_v)
+		c := next_int(&cmd_v)
+		for i := 0; i < c+1; i++ {
+			vertex_link(*vertices, a, b)
+		}
+		*cmd = ""
+		goto done
 	}
 	if cmd_v[0] == 'l' && cmd_v[1] == 'n' && cmd_v[2] != 'r' {
 		cmd_v = cmd_v[2:]
@@ -83,6 +96,25 @@ func cmd_execute(cmd *string, vertices *[]vertex_t, num_vertices *int) bool {
 		*cmd = ""
 		goto done
 	}
+
+	if cmd_v[0] == 'm' && cmd_v[1] == 'u' && cmd_v[2] == 't' && cmd_v[3] == 'm' {
+		cmd_v = strip_white_space_left(cmd_v)
+		cmd_v = cmd_v[4:]
+		order := make([]int, 0)
+		for len(cmd_v) > 0 {
+			order = append(order, next_int((&cmd_v)))
+		}
+		if len(order) < 2 {
+			return false
+		}
+		for i := 0; i < order[len(order)-1]; i++ {
+			for j := 0; j < len(order)-1; j++ {
+				mutate_inline(*vertices, len(*vertices), order[j])
+			}
+		}
+		*cmd = ""
+		goto done
+	}
 	if cmd_v[0] == 'm' && cmd_v[1] == 'u' && cmd_v[2] == 't' {
 		cmd_v = cmd_v[3:]
 		cmd_v = strip_white_space_left(cmd_v)
@@ -96,6 +128,7 @@ func cmd_execute(cmd *string, vertices *[]vertex_t, num_vertices *int) bool {
 		*cmd = ""
 		goto done
 	}
+
 	if cmd_v == "reset" {
 		*num_vertices = 0
 		*cmd = ""
