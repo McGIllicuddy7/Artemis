@@ -12,7 +12,7 @@ import (
 const SCREEN_HEIGHT = 900
 const SCREEN_WIDTH = 900
 const MAX_VERTICES = 64
-const OFFSET = 1
+const OFFSET = 0
 
 func main() {
 	cmd := ""
