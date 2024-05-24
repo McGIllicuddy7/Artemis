@@ -70,7 +70,7 @@ func cmd_execute(cmd *string, vertices *[]vertex_t, num_vertices *int) bool {
 		cmd_v = strip_white_space_left(cmd_v)
 		b := next_int(&cmd_v)
 		c := next_int(&cmd_v)
-		for i := 0; i < c+1; i++ {
+		for i := 0; i < c; i++ {
 			vertex_link(*vertices, a, b)
 		}
 		*cmd = ""

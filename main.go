@@ -5,6 +5,7 @@ import (
 	"artemis/utils"
 	"fmt"
 	"math"
+	"os"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
@@ -16,8 +17,14 @@ const OFFSET = 0
 
 func main() {
 	cmd := ""
-	vertices := make([]vertex_t, MAX_VERTICES)
-	num_vertices := 0
+	Q, err := LoadQuiver("q.txt")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to load %s\n", err.Error())
+		Q = RandomQuiver(4, 3)
+	}
+	vertices := Q.points
+	num_vertices := Q.num_points
+	println(num_vertices)
 	//graphics initalization
 	rl.SetTraceLogLevel(rl.LogError)
 	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Artemis")
@@ -34,10 +41,10 @@ func main() {
 		if rl.IsMouseButtonPressed(rl.MouseLeftButton) && rl.GetMousePosition().Y < SCREEN_HEIGHT-20 {
 			create_vertex(rl.GetMousePosition(), &vertices, &num_vertices)
 			mat = make_matrix_from_quiver(vertices, num_vertices)
-			eigens = mat.EigenValues()
-			_ = mat.EigenVectors()
-			poly := mat.ToEigenMatrix().CharacteristicPolynomial()
-			poly_str = poly.ToString()
+			//eigens = mat.EigenValues()
+			//_ = mat.EigenVectors()
+			//poly := mat.ToEigenMatrix().CharacteristicPolynomial()
+			//poly_str = poly.ToString()
 			mlt_str = ""
 		}
 		if rl.IsKeyPressed(rl.KeyEnter) {
@@ -45,14 +52,14 @@ func main() {
 			err := cmd_execute(&cmd, &vertices, &num_vertices)
 			Sanitize(vertices, num_vertices)
 			mat = make_matrix_from_quiver(vertices, num_vertices)
-			eigens = mat.EigenValues()
-			_ = mat.EigenVectors()
+			//eigens = mat.EigenValues()
+			//_ = mat.EigenVectors()
 			if !err {
 				t_error = 1.0
 				cmd = ""
 			}
-			poly := mat.ToEigenMatrix().CharacteristicPolynomial()
-			poly_str = poly.ToString()
+			//poly := mat.ToEigenMatrix().CharacteristicPolynomial()
+			//poly_str = poly.ToString()
 			_, tmp := La.MatrixPairRowReduce(old, mat)
 			mlt_str = tmp.ToString()
 		} else {
@@ -125,7 +132,15 @@ func main() {
 			t_error -= float64(rl.GetFrameTime())
 			rl.DrawText("error: improper input", 600, 40, 16, rl.Red)
 		}
-		rl.DrawText("char poly: "+poly_str, 400, 800, 16, rl.White)
+		rl.DrawText("char poly: "+poly_str, 400, 700, 16, rl.White)
+		quiv := Quiver{vertices, num_vertices}
+		c := fmt.Sprintf("%d", Cost(quiv))
+		rl.DrawText("cost: "+c, 700, 800, 16, rl.RayWhite)
+		for i := 0; i < num_vertices; i++ {
+			m := fmt.Sprintf("cost after mutation at %d: %d", i, Cost(quiv.MutateAt(i)))
+			rl.DrawText(m, 400, int32(800+i*20), 16, rl.RayWhite)
+		}
 		rl.EndDrawing()
 	}
+	//SaveQuiver("q.txt", Quiver{vertices, num_vertices})
 }
