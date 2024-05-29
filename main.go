@@ -60,8 +60,12 @@ func main() {
 			}
 			//poly := mat.ToEigenMatrix().CharacteristicPolynomial()
 			//poly_str = poly.ToString()
-			_, tmp := La.MatrixPairRowReduce(old, mat)
-			mlt_str = tmp.ToString()
+			if mat.NumCols() == old.NumCols() && mat.NumRows() == old.NumRows() {
+				_, tmp := La.MatrixPairRowReduce(old, mat)
+				mlt_str = tmp.ToString()
+			} else {
+				mlt_str = ""
+			}
 		} else {
 			cmd_parse(&cmd)
 		}
